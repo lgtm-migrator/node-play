@@ -1,13 +1,14 @@
 
 
 // Much thanks to https://youtu.be/95D99HEn4xU for the clarity of the algorithm process
+// Also thanks to https://www2.cs.duke.edu/csed/curious/compression/lzw.html for the clarity of the algorithm process
 
 import { encode } from "./encode"
 import { decode } from "./decode"
 
-// const bitStream = 'the quick brown fox jumps over the lazy dogthe quick brown fox jumps over the lazy dogthe quick brown fox jumps over the lazy dogthe quick brown fox jumps over the lazy dog'
+const bitStream = 'the quick brown fox jumps over the lazy dogthe quick brown fox jumps over the lazy dogthe quick brown fox jumps over the lazy dogthe quick brown fox jumps over the lazy dog'
 
-const bitStream = 'ba ba ba ba'
+// const bitStream = 'ba ba ba ba'
 
 console.log(`bitStream: ${bitStream}\n`)
 
@@ -36,6 +37,7 @@ const uncompressedValues = decode(compressed)
 
 console.log('========================================================\n')
 
+console.log(`uncompressedValues: ${uncompressedValues.join(', ')}\n`)
 console.dir(uncompressedValues, { depth: null })
 
 let uncompressedBitStream: string[] = []
@@ -45,4 +47,4 @@ for (let i = 0; i < uncompressedValues.length; i++) {
     uncompressedBitStream.push(bit)
 }
 
-console.log(`uncompressedBitStream: ${uncompressedBitStream.join('')}\n`)
+console.log(`uncompressedBitStream: ${JSON.stringify(uncompressedBitStream.join(''))}\n`)

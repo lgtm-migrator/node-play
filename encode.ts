@@ -18,13 +18,16 @@ import { IDictionaryEntry } from "./types"
     for (let i = 0; i < values.length; i++) {
         let currentValue = values[i]
         const searchValue = priorValue.concat(currentValue)
+        console.log(`priorValue: ${priorValue.join(', ')}`)
         console.log(`searchValue: ${searchValue}`)
         const entry = dictionary.find(item => item.value.toString() === searchValue.toString())
+        console.log(`entry: ${JSON.stringify(entry)}`)
 
         if (entry) {
             console.log('yes')
             // found in the dictionary
             priorValue = searchValue
+            console.log(`priorValue: ${priorValue}`)
         } else {
             console.log('no')
             // not found in the dictionary
@@ -38,10 +41,12 @@ import { IDictionaryEntry } from "./types"
             compressed = compressed.concat(priorKey.key)
 
             let newEntry: IDictionaryEntry = { key: nextDictionaryIndex, value: searchValue }
+            console.log(`newEntry: ${JSON.stringify(newEntry)}`)
             dictionary.push(newEntry)
             nextDictionaryIndex++
 
             priorValue = [currentValue]
+            console.log(`priorValue: ${priorValue}`)
         }
         console.log(`==========================================================`)
     }
