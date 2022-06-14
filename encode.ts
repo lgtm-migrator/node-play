@@ -1,4 +1,5 @@
 import { initDictionary } from "./functions"
+import { IDictionaryEntry } from "./types"
 
 /**
  * 
@@ -6,72 +7,58 @@ import { initDictionary } from "./functions"
  * @returns 
  */
  export function encode(values: number[]): number[] {
-    let priorValue: number[] = []
     let compressed: number[] = []
 
     // Initialize the dictionary
     // Fill the dictionary with the first values
     let { dictionary, nextDictionaryIndex } = initDictionary([], 0)
 
-    // Process the first value
-    let currentValue = values[0]
-    priorValue = [currentValue]
+    let priorValue:number[] = []
 
+    for (let i = 0; i < values.length; i++) {
+        let currentValue = values[i]
+        const searchValue = priorValue.concat(currentValue)
+        console.log(`searchValue: ${searchValue}`)
+        const entry = dictionary.find(item => item.value.toString() === searchValue.toString())
 
-    // Loop through the values
-    for (let i = 1; i < values.length; i++) {
+        if (entry) {
+            console.log('yes')
+            // found in the dictionary
+            priorValue = searchValue
+        } else {
+            console.log('no')
+            // not found in the dictionary
+            const priorKey = dictionary.find(item => item.value.toString() === priorValue.toString())
 
-        if (i == values.length - 1) {
-            // We are at the end of the values
-            // Add the last value to the compressed array
-            compressed.push(currentValue)
-            break
-        }
-
-        const value = values[i]
-        let searchValue = priorValue.concat([value])
-
-        // Lookup the symbol in the dictionary
-        let found = dictionary.find(item => item.value.toString() === searchValue.toString())
-
-        // Not already in the dictionary
-        if (typeof found === 'undefined') {
-            console.log(`${searchValue} was not found in the dictionary\n`)
-            // Add the value to the dictionary
-            const newItem = { key: nextDictionaryIndex, value: searchValue }
-            console.log(`newItem: ${JSON.stringify(newItem)}\n`)
-            dictionary.push(newItem)
-            // Increment the next dictionary index
-            nextDictionaryIndex++
-
-            // Log the dictionary size
-            console.log(`dictionarySize: ${dictionary.length}\n`)
-
-            // Add the previous key to the compressed stream
-            console.log(`previousValue: ${priorValue}\n`)
-
-            const previousValue = dictionary.find(item => item.value.toString() === priorValue.toString())
-
-            if (typeof previousValue !== 'undefined') {
-                compressed.push(previousValue.key)
+            if (typeof priorKey === 'undefined') {
+                throw new Error("Symbol not found in dictionary")
             }
 
-            // Reset the found value to the new value
-            priorValue = [value]
-            console.log(`priorValue: ${priorValue}\n`)
+            console.log(`priorKey: ${priorKey.key}`)
+            compressed = compressed.concat(priorKey.key)
 
+            let newEntry: IDictionaryEntry = { key: nextDictionaryIndex, value: searchValue }
+            dictionary.push(newEntry)
+            nextDictionaryIndex++
 
-        } else {
-            // we found the value in the dictionary
-            console.log(`${searchValue} was found in the dictionary\n`)
-            console.log(`found: ${JSON.stringify(found)}\n`)
-            priorValue = searchValue
-            console.log(`priorValue: ${priorValue}\n`)
+            priorValue = [currentValue]
         }
-        console.log('========================================================\n')
+        console.log(`==========================================================`)
     }
 
+    // Add the last value
+    const priorKey = dictionary.find(item => item.value.toString() === priorValue.toString())
+
+    if (typeof priorKey === 'undefined') {
+        throw new Error("Symbol not found in dictionary")
+    }
+
+    console.log(`priorKey: ${priorKey.key}`)
+    compressed = compressed.concat(priorKey.key)
+
     console.log(`dictionary: ${JSON.stringify(dictionary)}\n`)
+
+    console.log(`compressed: ${JSON.stringify(compressed)}`)
 
     return compressed
 }

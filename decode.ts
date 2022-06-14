@@ -7,19 +7,20 @@ import { IDictionaryEntry } from "./types"
  * @returns 
  */
 export function decode(compressed: number[]): number[] {
-
-    let workingValues: number[] = []
+    // Initialize the output array
+    let uncompressed: number[] = []
 
     // Initialize the dictionary
     let { dictionary, nextDictionaryIndex } = initDictionary([], 0)
 
-    // Initialize the output array
-    let uncompressed: number[] = []
+    let priorValue:number[] = []
 
     // Process the first value
     let currentValue = compressed[0]
+    console.log(`currentValue: ${currentValue}`)
     uncompressed = uncompressed.concat(currentValue)
-    workingValues = [currentValue]
+    priorValue = [currentValue]
+    console.log(`==========================================================`)
 
     // Loop through the values
     for (let i = 1; i < compressed.length; i++) {
@@ -27,30 +28,24 @@ export function decode(compressed: number[]): number[] {
         const currentSymbol = compressed[i]
         console.log(`currentSymbol: ${currentSymbol}`)
 
-        console.log(`workingValues: ${workingValues}`)
-
         // Lookup the symbol in the dictionary
         let symbolEntry = dictionary.find(item => item.key === currentSymbol)
 
-        // Symbol found
-        if (symbolEntry) {
-            console.log(`symbolEntry found: ${JSON.stringify(symbolEntry)}`)
-            uncompressed = uncompressed.concat(symbolEntry.value)
-            let newPossibleEntry = workingValues.concat(symbolEntry.value)
-            workingValues = symbolEntry.value
-
-            if (newPossibleEntry.length > 1) {
-                let newEntry: IDictionaryEntry = { key: nextDictionaryIndex, value: newPossibleEntry }
-                console.log(`newEntry: ${JSON.stringify(newEntry)}`)
-                dictionary.push(newEntry)
-                nextDictionaryIndex++
-            }
-
-            console.log(`new workingValues: ${workingValues}`)
-        } else {
-            console.log(`symbolEntry not found`)
-            break
+        if (typeof symbolEntry === 'undefined') {
+            throw new Error("Symbol not found in dictionary")
         }
+            
+        // Symbol found
+        console.log(`symbolEntry found: ${JSON.stringify(symbolEntry)}`)
+        uncompressed = uncompressed.concat(symbolEntry.value)
+
+        let ch = symbolEntry.value[0]
+
+        let newEntry: IDictionaryEntry = { key: nextDictionaryIndex, value: [priorValue[0]].concat(ch) }
+        console.log(`newEntry: ${JSON.stringify(newEntry)}`)
+        dictionary.push(newEntry)
+        nextDictionaryIndex++
+        priorValue = [ch]
 
         console.log(`==========================================================`)
     }
