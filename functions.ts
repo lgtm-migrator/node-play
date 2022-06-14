@@ -1,4 +1,4 @@
-import { IDictionaryEntry } from "./types"
+import { ILZWDictionaryEntry } from "./ILZWDictionaryEntry"
 
 
 
@@ -8,7 +8,7 @@ import { IDictionaryEntry } from "./types"
  * @param nextDictionaryIndex 
  * @returns {dictionary: IDictionaryEntry[], nextDictionaryIndex: number}
  */
-export function initDictionary(dictionary: IDictionaryEntry[], nextDictionaryIndex: number) {
+export function initDictionary(dictionary: ILZWDictionaryEntry[], nextDictionaryIndex: number) {
     for (let i = 0; i < 256; i++) {
         dictionary.push({ key: i, value: [i] })
         nextDictionaryIndex = i

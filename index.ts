@@ -3,8 +3,8 @@
 // Much thanks to https://youtu.be/95D99HEn4xU for the clarity of the algorithm process
 // Also thanks to https://www2.cs.duke.edu/csed/curious/compression/lzw.html for the clarity of the algorithm process
 
-import { encode } from "./encode"
-import { decode } from "./decode"
+import { lzwEncode } from "./lzwEncode"
+import { lzwDecode } from "./lzwDecode"
 
 const bitStream = 'the quick brown fox jumps over the lazy dogthe quick brown fox jumps over the lazy dogthe quick brown fox jumps over the lazy dogthe quick brown fox jumps over the lazy dog'
 
@@ -25,7 +25,7 @@ console.log(`values: ${values.join(', ')}\n`)
 
 console.log('========================================================\n')
 
-const compressed = encode(values)
+const compressed = lzwEncode(values)
 
 console.log(`compressed length: ${compressed.length}\n`)
 
@@ -33,7 +33,7 @@ console.log(`compressed: ${compressed.join(', ')}\n`)
 
 console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n')
 
-const uncompressedValues = decode(compressed)
+const uncompressedValues = lzwDecode(compressed)
 
 console.log('========================================================\n')
 
