@@ -43,8 +43,8 @@ console.dir(uncompressedValues, { depth: null })
 let uncompressedBitStream: string[] = []
 
 for (let i = 0; i < uncompressedValues.length; i++) {
-    const bit = String.fromCharCode(uncompressedValues[i])
+    const bit = uncompressedValues[i].toString(16)
     uncompressedBitStream.push(bit)
 }
 
-console.log(`uncompressedBitStream: ${JSON.stringify(uncompressedBitStream.join(''))}\n`)
+console.log(`uncompressedBitStream: ${uncompressedBitStream.join('')}\n`)
