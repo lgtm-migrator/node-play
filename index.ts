@@ -129,6 +129,34 @@ export function getLiteralToken(mode: string, literal: number): IToken {
     return literalCodes[literal]
 }
 
+/**
+ * Return the number of bits in the given number
+ * @param {number} byte 
+ * @returns {number}
+ */
+ export function getBitLength(byte: number): number {
+    return Math.ceil(Math.log2(byte))
+}
+
+/**
+ * Pop the number of bits from the given byte
+ * @param {number} byte 
+ * @param {number} count 
+ * @returns {bits: number, remainingBits: number}
+ */
+export function popBits(byte: number, count: number): {bits: number, remainingBits: number} {
+    let one = new Number(byte).valueOf()
+    let two = new Number(byte).valueOf()
+    const bits = one >>> count
+    const remainingBits = two - bits
+    return { bits, remainingBits }
+}
+
+const { bits, remainingBits } = popBits(0x159, 4)
+
+console.log(`bits: ${bits.toString(16)}`)
+console.log(`remainingBits: ${remainingBits.toString(16)}`)
+
 while (streamIndex < decodeBytes.length) {
     const byte = decodeBytes[streamIndex]
     streamIndex++
@@ -140,3 +168,5 @@ while (streamIndex < decodeBytes.length) {
         throw new Error('END_OF_STREAM is not implemented yet')
     }
 }
+
+
