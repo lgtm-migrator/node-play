@@ -1,6 +1,148 @@
 // Implimenting https://groups.google.com/g/comp.compression/c/M5P064or93o/m/W1ca1-ad6kgJ?pli=1
 
+import { generateLiteralCodesMode0 } from "./generateLiteralCodesMode0"
+import { getDictionarySize } from "./getDictionarySize"
+import { getLiteralMode } from "./getLiteralMode"
+import { getLiteralToken } from "./getLiteralToken"
+import { ETokenType, LiteralTokens } from "./types"
+
 const decodeBytes = Buffer.from([0x00, 0x04, 0x82, 0x24, 0x25, 0x8f, 0x80, 0x7f])
+
+/**
+ * Transforms a byte array into an array of bit values.
+ * @param inBuffer Buffer to transform
+ * @returns {number[]} Array of bit values
+ */
+export function toBin(inBuffer: Buffer): number[] {
+    let bits: number[] = []
+
+    const num = inBuffer.readInt8(0)
+
+    for (let i = 0; i < 8; i++) {
+        bits.push(num & (1 << i) ? 1 : 0)
+    }
+
+    console.log(`bits: ${JSON.stringify(bits)}`)
+    return bits
+
+}
+
+/**
+ * Tranform a array of bit values into a byte
+ * @param bits an array of bits
+ * @returns {number} the number represented by the bits
+ */
+export function toByte(bits: number[]): number {
+    let num = 0
+    bits.forEach((bit, index) => {
+        num += bit << index
+    })
+    console.log(`num: ${num}`)
+    return num
+}
+
+export function reverseByte(byte: number): number {
+    let flippedByte = 0
+    const bits = toBin(Buffer.from([byte]))
+    let newByte: number[] = []
+    // Loop through the bits and push them to the front of the new byte
+    bits.forEach((bit) => {
+        newByte.push(bit)
+    })
+    // Push the new byte to the bits array
+    return toByte(bits)
+}
+
+export class BinaryReader {
+    public bitIndex: number
+    public bits: number[]
+    public buffer: Buffer
+
+    constructor(buffer: Buffer) {
+        this.buffer = buffer
+        this.bits = []
+        this.bitIndex = 0
+
+        // Loop through the buffer and convert each byte to bits
+        buffer.forEach((byte) => {
+            const bits = toBin(Buffer.from([byte]))
+            let newByte: number[] = []
+            // Loop through the bits and push them to the front of the new byte
+            bits.forEach((bit) => {
+                newByte.push(bit)
+            })
+            // Push the new byte to the bits array
+            this.bits = [...this.bits, ...newByte]
+        })
+    }
+
+    /**
+     *
+     *
+     * @readonly
+     * @type {number}
+     * @memberof BinaryReader
+     */
+    public get bitCount(): number {
+        return this.bits.length
+    }
+
+    /**
+     * Move the index pointer to a specific location
+     * @param bitIndex The value to set the bit index to
+     */
+    public seek(bitIndex: number): void {
+        this.bitIndex = bitIndex
+    }
+
+    /**
+     * Move the index pointer back by a specific amount
+     * @param bitCount The number of bits to rewind the bit index
+     */
+    public rewind(bitCount: number): void {
+        this.bitIndex -= bitCount
+    }
+
+    /**
+     * Get the next bit
+     * @returns {number} the next bit
+     */
+    private nextBit(): number {
+        // Get the bit at the current index
+        const bit = this.bits[this.bitIndex]
+        // Increment the bit index
+        this.bitIndex++
+        // Return the bit
+        return bit
+    }
+
+    /**
+     * Get the next n bits
+     * @param bitCount The number of bits to read
+     * @returns {number} the next n bits
+     */
+    public nextBits(bitCount: number): number[] {
+        console.log(`bitIndex before: ${this.bitIndex}`)
+
+        // Create a new array to hold the bits
+        let bits: number[] = []
+        // Loop through the bit count
+        for (let i = 0; i < bitCount; i++) {
+            // Get the next bit
+            const bit = this.nextBit()
+            // Push the bit to the bits array
+            bits.push(bit)
+        }
+
+        console.log(`bitIndex after: ${this.bitIndex}`)
+
+        // Return the number
+        return bits
+    }
+}
+
+// After header is removed
+// 10000010 0 01001000 01001011 00011111000000001111111
 
 let streamIndex = 0
 
@@ -9,44 +151,6 @@ console.log(`decodeBytes: ${decodeBytes.toString('hex')}\n`)
 for (let i = 0; i < decodeBytes.length; i++) {
     const byte = decodeBytes[i]
     console.log(`byte ${i}: ${byte.toString(16)}`)
-}
-console.log('========================================================\n')
-
-export enum ELiteralMode {
-    'MODE_0' = 'MODE_0',
-    'MODE_1' = 'MODE_1',
-}
-
-export enum EDictionarySize {
-    '0x04' = 1024,
-    '0x05' = 2048,
-    '0x06' = 4096,
-}
-
-export function getLiteralMode(byte: number): string {
-    if (byte === 0x00) {
-        return ELiteralMode.MODE_0
-    } else if (byte === 0x01) {
-        // return ELiteralMode.MODE_1
-        throw new Error('MODE_1 is not implemented yet')
-    } else {
-        throw new Error(`literalMode: invalid literalMode byte: ${byte.toString(16)}`)
-    }
-}
-
-export function getDictionarySize(byte: number): number {
-    if (byte === 0x04) {
-        return EDictionarySize['0x04']
-    } else if (byte === 0x05) {
-        // return EDictionarySize['0x05']
-        throw new Error('Not implemented')
-    // deepcode ignore DuplicateIfBody: Not implemented yet
-    } else if (byte === 0x06) {
-        // return EDictionarySize['0x06']
-        throw new Error('Not implemented')
-    } else {
-        throw new Error(`dictionarySize: invalid dictionarySize byte: ${byte.toString(16)}`)
-    }
 }
 
 let byteToCheck = decodeBytes[streamIndex]
@@ -67,106 +171,40 @@ const dictionarySize = getDictionarySize(byteToCheck)
 
 console.log(`dictionarySize: ${dictionarySize}\n`)
 
-export enum ETokenType {
-    'LITERAL' = 'LITERAL',
-    'DISTANCE_LENGTH' = 'DISTANCE_LENGTH',
-    'END_OF_STREAM' = 'END_OF_STREAM',
-}
 
-export function getTokenType(byte: number): ETokenType {
-    if (byte === 0xFF) {
-        // return ETokenType.END_OF_STREAM
-        throw new Error('END_OF_STREAM is not implemented yet')
-    } else if ( byte & 0x01) {
-        // return ETokenType.DISTANCE_LENGTH
-        throw new Error('DISTANCE_LENGTH is not implemented yet')
-    } else {
-        return ETokenType.LITERAL
-    } 
-    
-}
+LiteralTokens.MODE_0 = generateLiteralCodesMode0()
 
-export interface IToken {
-    tokenType: ETokenType,
-    literalMode: ELiteralMode,
-    literal: number,
-    value: number,
-    distance: number,
-    length: number
-}
+console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n')
 
-export function generateLiteralCodesMode0(): IToken[] {
-    const literalCodes: IToken[] = []
-    for (let i = 0; i < 256; i++) {
-        const newToken: IToken = {
-            tokenType: ETokenType.LITERAL,
-            literalMode: ELiteralMode.MODE_0,
-            literal: i,
-            value: i,
-            distance: 0,
-            length: 0
-        }
-        literalCodes.push(newToken)
-    }
-    return literalCodes
-}
+console.log('========================================================\n')
 
-const literalCodesMode0 = generateLiteralCodesMode0()
+const binaryReader = new BinaryReader(decodeBytes.slice(2, decodeBytes.length))
+console.log(`bitCount: ${binaryReader.bitCount}`)
+console.log(`bitIndex: ${binaryReader.bitIndex}`)
+console.log(`bits: ${JSON.stringify(binaryReader.bits)}`)
 
-const LiteralTokens: Record<string, IToken[]> = {
-    MODE_0: literalCodesMode0,
-    MODE_1: []
-}
+console.log('========================================================\n')
 
-export function getLiteralToken(mode: string, literal: number): IToken {
-    const literalCodes = LiteralTokens[mode]
+while (streamIndex < binaryReader.bitCount) {
 
-    console.log(`literal prior to type removal: ${literal.toString(16)}`)
-
-    // Clear the literal type bit
-    literal = literal >>> 1
-
-    return literalCodes[literal]
-}
-
-/**
- * Return the number of bits in the given number
- * @param {number} byte 
- * @returns {number}
- */
- export function getBitLength(byte: number): number {
-    return Math.ceil(Math.log2(byte))
-}
-
-/**
- * Pop the number of bits from the given byte
- * @param {number} byte 
- * @param {number} count 
- * @returns {bits: number, remainingBits: number}
- */
-export function popBits(byte: number, count: number): {bits: number, remainingBits: number} {
-    let one = new Number(byte).valueOf()
-    let two = new Number(byte).valueOf()
-    const bits = one >>> count
-    const remainingBits = two - bits
-    return { bits, remainingBits }
-}
-
-const { bits, remainingBits } = popBits(0x159, 4)
-
-console.log(`bits: ${bits.toString(16)}`)
-console.log(`remainingBits: ${remainingBits.toString(16)}`)
-
-while (streamIndex < decodeBytes.length) {
-    const byte = decodeBytes[streamIndex]
     streamIndex++
-    const tokenType = getTokenType(byte)
-    if (tokenType === ETokenType.LITERAL || tokenType === ETokenType.DISTANCE_LENGTH) {
-        const literal = getLiteralToken(literalMode, byte)
+
+    const tokenType = toByte(binaryReader.nextBits(1))
+    tokenType === 0 ? console.log('tokenType: 0') : console.log('tokenType: 1')
+    if (tokenType === ETokenType.LITERAL) {
+
+        const byte = binaryReader.nextBits(8)
+        console.log(`byte: ${byte.toString()}`)
+
+        const literal = getLiteralToken(literalMode, toByte(byte))
         console.log(`literal: ${literal.value}`)
+    } else if (tokenType === ETokenType.DISTANCE_LENGTH) {
+        throw new Error('Distance index not implemented')
     } else if (tokenType === ETokenType.END_OF_STREAM) {
         throw new Error('END_OF_STREAM is not implemented yet')
     }
+    console.log('========================================================\n')
 }
+
 
 
