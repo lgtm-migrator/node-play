@@ -3,8 +3,8 @@
 // Much thanks to https://youtu.be/95D99HEn4xU for the clarity of the algorithm process
 // Also thanks to https://www2.cs.duke.edu/csed/curious/compression/lzw.html for the clarity of the algorithm process
 
-import { lzwEncode } from "./lzwEncode"
-import { lzwDecode } from "./lzwDecode"
+import { lzwDecode } from "./lzwDecode.js"
+import { lzwEncode } from "./lzwEncode.js"
 
 const bitStream = 'the quick brown fox jumps over the lazy dogthe quick brown fox jumps over the lazy dogthe quick brown fox jumps over the lazy dogthe quick brown fox jumps over the lazy dog'
 

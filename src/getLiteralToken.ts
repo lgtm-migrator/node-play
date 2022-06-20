@@ -1,4 +1,4 @@
-import { IToken, LiteralTokens } from "./types";
+import { IToken, LiteralTokens } from "./types.js";
 
 
 export function getLiteralToken(mode: string, literal: number): IToken {

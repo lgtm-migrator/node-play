@@ -1,7 +1,4 @@
-import { ELiteralMode, ETokenType, IToken } from "./types";
-
-
-
+import { ELiteralMode, ETokenType, IToken } from "./types.js";
 
 export function generateLiteralCodesMode0(): IToken[] {
     const literalCodes: IToken[] = [];

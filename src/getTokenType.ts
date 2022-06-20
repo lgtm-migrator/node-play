@@ -1,4 +1,4 @@
-import { ETokenType } from "./types";
+import { ETokenType } from "./types.js";
 
 export function getTokenType(byte: number): ETokenType {
     if (byte === 0xFF) {

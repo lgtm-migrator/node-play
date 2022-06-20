@@ -1,4 +1,4 @@
-import { ELiteralMode } from "./types";
+import { ELiteralMode } from "./types.js";
 
 
 export function getLiteralMode(byte: number): string {

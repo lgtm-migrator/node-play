@@ -1,4 +1,4 @@
-import { initDictionary } from "./functions";
+import { initDictionary } from "./initDictionary";
 import { ILZWDictionaryEntry } from "./ILZWDictionaryEntry";
 var debug = require('debug')('boom10:lzwEncode');
 

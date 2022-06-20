@@ -1,5 +1,4 @@
-import { EDictionarySize } from "./types";
-
+import { EDictionarySize } from "./types.js";
 
 export function getDictionarySize(byte: number): number {
     if (byte === 0x04) {
