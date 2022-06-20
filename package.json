@@ -5,6 +5,7 @@
   "export": "index.js",
   "type": "module",
   "scripts": {
+    "start": "clear && ts-node-esm src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
