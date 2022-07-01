@@ -87,4 +87,13 @@ export class BinaryReader {
         // Return the number
         return bits;
     }
+
+    /**
+     * Check if there are the needed number of bits left in the buffer
+     * @param bitCountNeeded - how many bits to check
+     * @returns 
+     */
+    public hasBits(bitCountNeeded: number) {
+        return (bitCountNeeded + this.bitIndex) < this.bits.length
+    }
 }
